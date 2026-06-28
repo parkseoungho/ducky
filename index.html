@@ -34,6 +34,21 @@
   .screen.active{display:block;}
   @keyframes fade{from{opacity:0} to{opacity:1}}
 
+  /* decorative pond background */
+  .bg{position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden;}
+  .bg .scene{position:absolute; inset:0; width:100%; height:100%;}
+  .cloud{position:absolute; height:24px; background:rgba(255,255,255,.82); border-radius:999px; opacity:.85;}
+  .cloud::before,.cloud::after{content:""; position:absolute; background:inherit; border-radius:50%;}
+  .cloud::before{width:58%; height:170%; left:12%; top:-58%;}
+  .cloud::after{width:42%; height:150%; right:13%; top:-46%;}
+  .c1{width:84px; top:5%; left:6%; animation:drift 30s ease-in-out infinite;}
+  .c2{width:60px; top:11%; left:62%; animation:drift 40s ease-in-out infinite reverse;}
+  .c3{width:104px; top:2.5%; left:36%; animation:drift 52s ease-in-out infinite;}
+  @keyframes drift{0%{transform:translateX(-12px)} 50%{transform:translateX(26px)} 100%{transform:translateX(-12px)}}
+  #home > :not(.bg){position:relative; z-index:1;}
+  .stagemap > .map-top, .stagemap > .map-scroll{position:relative; z-index:1;}
+  .game > .game-top, .game > .board{position:relative; z-index:1;}
+
   .pill{display:inline-flex; align-items:center; justify-content:center; gap:6px; background:var(--btn);
     color:var(--ink); font-weight:800; border:none; border-radius:999px; padding:14px 22px; font-size:15px;
     cursor:pointer; box-shadow:var(--shadow); touch-action:manipulation; transition:transform .05s;}
@@ -55,9 +70,18 @@
   #duck{width:180px; height:180px; cursor:pointer; touch-action:manipulation;
     transition:transform .07s ease; will-change:transform;}
   #duck.bounce{transform:scale(.93);}
-  .float{position:absolute; font-weight:800; color:var(--duck-deep); font-size:22px;
-    pointer-events:none; text-shadow:0 1px 0 #fff; animation:rise .7s ease-out forwards;}
-  @keyframes rise{from{opacity:1; transform:translateY(0)} to{opacity:0; transform:translateY(-50px)}}
+  .float{position:absolute; font-weight:900; color:var(--duck); font-size:38px; pointer-events:none;
+    -webkit-text-stroke:2px #10242E; text-shadow:0 4px 0 rgba(16,36,46,.35); z-index:3;
+    animation:rise .8s cubic-bezier(.2,.85,.25,1) forwards; will-change:transform,opacity;}
+  @keyframes rise{
+    0%{opacity:0; transform:translate(-50%,-50%) scale(.3) rotate(-8deg);}
+    22%{opacity:1; transform:translate(-50%,-95%) scale(1.35) rotate(4deg);}
+    45%{transform:translate(-50%,-120%) scale(1) rotate(0);}
+    100%{opacity:0; transform:translate(-50%,-220%) scale(1);}}
+  .tapring{position:absolute; width:46px; height:46px; border:4px solid var(--duck); border-radius:50%;
+    pointer-events:none; z-index:2; animation:tapring .5s ease-out forwards;}
+  @keyframes tapring{from{transform:translate(-50%,-50%) scale(.3); opacity:.9}
+    to{transform:translate(-50%,-50%) scale(1.9); opacity:0}}
   .meter{margin-top:4px;}
   .meter .row{display:flex; justify-content:space-between; color:#fff; font-weight:800; font-size:18px; padding:0 4px;}
   .meter .star{color:var(--duck);}
@@ -186,6 +210,21 @@
   <main>
     <!-- HOME -->
     <section class="screen active" id="home">
+      <div class="bg">
+        <span class="cloud c1"></span><span class="cloud c2"></span><span class="cloud c3"></span>
+        <svg class="scene" viewBox="0 0 430 800" preserveAspectRatio="xMidYMid slice">
+          <path d="M0 690 Q120 650 240 685 T430 678 V800 H0 Z" fill="#46b257" opacity=".5"/>
+          <rect x="0" y="744" width="430" height="56" fill="#1f9fd6" opacity=".4"/>
+          <rect x="20" y="250" width="7" height="185" rx="3" fill="#3f8f44" opacity=".5"/>
+          <ellipse cx="23.5" cy="238" rx="11" ry="28" fill="#8a5a2c" opacity=".5"/>
+          <rect x="403" y="300" width="7" height="185" rx="3" fill="#3f8f44" opacity=".5"/>
+          <ellipse cx="406.5" cy="288" rx="11" ry="28" fill="#8a5a2c" opacity=".5"/>
+          <path d="M44 432 q-12 -64 4 -126" stroke="#52b35a" stroke-width="6" fill="none" opacity=".45" stroke-linecap="round"/>
+          <path d="M62 432 q9 -72 -2 -134" stroke="#52b35a" stroke-width="6" fill="none" opacity=".45" stroke-linecap="round"/>
+          <path d="M-10 762 a40 20 0 1 0 80 0 a40 20 0 1 0 -80 0" fill="#3aa84a" opacity=".45"/>
+          <path d="M360 772 a44 22 0 1 0 88 0 a44 22 0 1 0 -88 0" fill="#3aa84a" opacity=".45"/>
+        </svg>
+      </div>
       <div class="balance"><span class="lbl">$Ducky point</span><span class="val" id="balance">0</span></div>
       <div class="banner"><b>Earn more<br>$Ducky point</b>
         <button class="pill" onclick="openPicker()">PLAY GAMES</button></div>
@@ -246,6 +285,18 @@
 
   <!-- stage map -->
   <div class="stagemap" id="stagemap">
+    <div class="bg">
+      <span class="cloud c1"></span><span class="cloud c2"></span><span class="cloud c3"></span>
+      <svg class="scene" viewBox="0 0 430 900" preserveAspectRatio="xMidYMid slice">
+        <ellipse cx="60" cy="320" rx="48" ry="22" fill="#2f97d6" opacity=".22"/>
+        <ellipse cx="384" cy="560" rx="56" ry="26" fill="#2f97d6" opacity=".2"/>
+        <path d="M-12 210 a42 21 0 1 0 84 0 a42 21 0 1 0 -84 0" fill="#3aa84a" opacity=".28"/>
+        <path d="M382 770 a46 23 0 1 0 92 0 a46 23 0 1 0 -92 0" fill="#3aa84a" opacity=".28"/>
+        <circle cx="92" cy="650" r="7" fill="rgba(255,255,255,.4)"/>
+        <circle cx="122" cy="606" r="5" fill="rgba(255,255,255,.35)"/>
+        <circle cx="332" cy="384" r="6" fill="rgba(255,255,255,.4)"/>
+      </svg>
+    </div>
     <div class="map-top">
       <button class="game-x" onclick="closeStageMap()">🏠</button>
       <div class="pt">🪙 <span id="mapPt">0</span></div>
@@ -256,6 +307,15 @@
 
   <!-- match-3 -->
   <div class="game" id="game">
+    <div class="bg">
+      <span class="cloud c1"></span><span class="cloud c2"></span><span class="cloud c3"></span>
+      <svg class="scene" viewBox="0 0 430 800" preserveAspectRatio="xMidYMid slice">
+        <path d="M0 726 Q120 690 240 720 T430 712 V800 H0 Z" fill="#76c98f" opacity=".5"/>
+        <rect x="0" y="768" width="430" height="32" fill="#3a9fd6" opacity=".4"/>
+        <path d="M-10 784 a40 20 0 1 0 80 0 a40 20 0 1 0 -80 0" fill="#3aa84a" opacity=".45"/>
+        <path d="M360 790 a44 22 0 1 0 88 0 a44 22 0 1 0 -88 0" fill="#3aa84a" opacity=".45"/>
+      </svg>
+    </div>
     <div class="game-top">
       <div class="hud"><div class="k">목표 <span id="gTarget"></span></div><div class="v"><span id="gCollected">0</span>/<span id="gGoal">0</span></div></div>
       <div class="hud"><div class="k">이동</div><div class="v" id="gMoves">0</div></div>
@@ -296,8 +356,10 @@ duck.addEventListener('pointerdown', e=>{
   state.taps++; duck.classList.add('bounce'); setTimeout(()=>duck.classList.remove('bounce'),70);
   const r=wrap.getBoundingClientRect();
   const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left, y=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
+  const ring=document.createElement('span'); ring.className='tapring'; ring.style.left=x+'px'; ring.style.top=y+'px';
+  wrap.appendChild(ring); setTimeout(()=>ring.remove(),500);
   const f=document.createElement('span'); f.className='float'; f.textContent='+1'; f.style.left=x+'px'; f.style.top=y+'px';
-  wrap.appendChild(f); setTimeout(()=>f.remove(),700); render(); save();
+  wrap.appendChild(f); setTimeout(()=>f.remove(),800); render(); save();
 });
 $('#claimBtn').addEventListener('click', ()=>{ if(state.taps<CAP) return; state.balance+=CAP; state.taps=0; render(); save(); toast(`+${CAP} 적립!`); });
 
