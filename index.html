@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#1FA8E8">
+<title>DUCKY</title>
+<style>
+  :root{
+    --sky:#26B5EE; --sky-dark:#1C9FD6; --sky-deep:#0E7FB3;
+    --duck:#FFD23D; --duck-deep:#F4B400;
+    --btn:#FFD400; --btn-press:#E8BE00;
+    --ink:#10242E; --ink-soft:#3A5663;
+    --card:#FFFFFF; --green:#7CCB4E; --green-on:#2E7D32;
+    --pond:#39C0F2;
+    --shadow:0 6px 0 rgba(0,0,0,.12);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; height:100%;}
+  body{
+    font-family:"Baloo 2","Comic Sans MS",system-ui,-apple-system,sans-serif;
+    background:#0b1418; color:var(--ink);
+    user-select:none; -webkit-user-select:none;
+    overscroll-behavior:none;
+  }
+  /* phone frame so it's usable on desktop too; full-bleed on real phones */
+  #app{
+    position:relative; margin:0 auto; max-width:430px; width:100%;
+    height:100dvh; display:flex; flex-direction:column;
+    background:var(--sky); overflow:hidden;
+  }
+  /* ---- header ---- */
+  header{
+    flex:0 0 auto; background:#fff; color:var(--ink);
+    padding:calc(env(safe-area-inset-top) + 10px) 16px 12px;
+    text-align:center; box-shadow:0 2px 8px rgba(0,0,0,.08); z-index:5;
+  }
+  header .t{font-weight:800; font-size:20px; letter-spacing:1px;}
+  header .s{font-size:12px; color:#9aa7ad; margin-top:-2px;}
+  header .menu{position:absolute; right:14px; top:calc(env(safe-area-inset-top) + 12px);
+    width:30px; height:30px; border:2px solid var(--sky); border-radius:50%;
+    color:var(--sky); display:grid; place-items:center; font-weight:800;}
+
+  /* ---- screens ---- */
+  main{flex:1 1 auto; position:relative; overflow:hidden;}
+  .screen{position:absolute; inset:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
+    padding:16px 16px 16px; display:none; animation:fade .2s ease;}
+  .screen.active{display:block;}
+  @keyframes fade{from{opacity:0} to{opacity:1}}
+
+  .pill{display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    background:var(--btn); color:var(--ink); font-weight:800; border:none;
+    border-radius:999px; padding:14px 22px; font-size:15px; cursor:pointer;
+    box-shadow:var(--shadow); touch-action:manipulation; transition:transform .05s;}
+  .pill:active{transform:translateY(3px); box-shadow:0 3px 0 rgba(0,0,0,.12);}
+  .pill[disabled]{background:#cfe8d4; color:#7da884; box-shadow:none; cursor:not-allowed;}
+
+  .card{background:var(--card); border-radius:22px; padding:18px; box-shadow:0 8px 20px rgba(0,0,0,.10);}
+  .coin{width:22px; height:22px; vertical-align:-5px;}
+
+  /* ---- HOME ---- */
+  .balance{background:rgba(255,255,255,.18); border-radius:18px; padding:16px 18px;
+    display:flex; justify-content:space-between; align-items:center; color:#fff;
+    backdrop-filter:blur(2px);}
+  .balance .lbl{font-weight:800; color:var(--duck); font-size:22px; text-shadow:0 1px 0 rgba(0,0,0,.15);}
+  .balance .val{font-weight:800; font-size:24px;}
+
+  .banner{margin-top:14px; border-radius:18px; padding:16px;
+    background:linear-gradient(90deg,#1f9fd6,#43c4f0); color:#fff;
+    display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .banner b{font-size:16px; line-height:1.15; display:block;}
+  .banner .pill{padding:11px 16px; font-size:13px;}
+
+  .tapwrap{position:relative; text-align:center; margin-top:18px; height:240px;
+    display:flex; align-items:center; justify-content:center;}
+  #duck{width:180px; height:180px; cursor:pointer; touch-action:manipulation;
+    transition:transform .07s ease; will-change:transform;}
+  #duck.bounce{transform:scale(.93);}
+  .float{position:absolute; font-weight:800; color:var(--duck-deep); font-size:22px;
+    pointer-events:none; text-shadow:0 1px 0 #fff; animation:rise .7s ease-out forwards;}
+  @keyframes rise{from{opacity:1; transform:translateY(0)} to{opacity:0; transform:translateY(-50px)}}
+
+  .meter{margin-top:4px;}
+  .meter .row{display:flex; justify-content:space-between; color:#fff; font-weight:800; font-size:18px; padding:0 4px;}
+  .meter .star{color:var(--duck);}
+  .bar{height:16px; background:rgba(255,255,255,.45); border-radius:999px; margin:10px 0 16px; overflow:hidden;}
+  .bar > i{display:block; height:100%; width:0%; background:var(--duck);
+    border-radius:999px; transition:width .12s ease;}
+  .claimrow{text-align:center;}
+  .claimrow .pill{width:100%; background:var(--green); color:#1f5d22;}
+  .claimrow .pill[disabled]{background:#cfe8d4; color:#7da884;}
+
+  /* ---- TASKS ---- */
+  .sectionTitle{color:var(--duck); font-weight:800; font-size:18px; line-height:1.2;
+    text-shadow:0 1px 0 rgba(0,0,0,.12); margin:18px 4px 12px;}
+  .daily{background:linear-gradient(120deg,#43c4f0,#1f9fd6); color:#fff; border-radius:22px;
+    padding:18px; display:flex; align-items:center; justify-content:space-between; gap:10px;
+    box-shadow:0 8px 20px rgba(0,0,0,.12);}
+  .daily b{font-size:17px; display:block;} .daily .amt{font-weight:800; margin-top:4px;}
+  .task{display:flex; align-items:center; gap:12px; margin-bottom:14px;}
+  .task .ico{width:46px; height:46px; flex:0 0 auto; border-radius:14px; display:grid; place-items:center;
+    color:#fff; font-weight:800; font-size:18px;}
+  .task .mid{flex:1 1 auto;}
+  .task .ttl{font-weight:800; font-size:15px;}
+  .task .amt{color:var(--ink-soft); font-weight:800; font-size:14px; margin-top:2px;}
+  .task .pill{padding:10px 18px; font-size:13px;}
+  .task .pill.done{background:#dff3e2; color:#3a9b50; box-shadow:none;}
+
+  /* ---- INVITE ---- */
+  .hero{height:200px; border-radius:22px; background:
+     radial-gradient(120% 120% at 70% 20%,#5b2a9e,#1b0f3a);
+     display:grid; place-items:center; color:#fff; position:relative; overflow:hidden;}
+  .hero .star{position:absolute; width:3px; height:3px; background:#fff; border-radius:50%; opacity:.8;}
+  .hero .big{font-size:64px;}
+  .refcard{margin-top:14px; background:var(--sky-deep); border-radius:22px; padding:18px; color:#fff;}
+  .refcard .lbl{font-weight:700; opacity:.95;}
+  .refcard .code{display:flex; align-items:center; gap:10px; margin-top:6px;}
+  .refcard .code b{color:var(--duck); font-size:24px; letter-spacing:1px;}
+  .refcard .cp{background:rgba(255,255,255,.2); border:none; color:#fff; border-radius:10px;
+    padding:6px 9px; cursor:pointer; font-size:14px;}
+  .refcard .pill{margin-top:14px; width:100%;}
+  .how{margin-top:14px; background:rgba(255,255,255,.18); border-radius:22px; padding:18px; color:#fff;}
+  .how h4{margin:0 0 12px; font-size:16px;}
+  .how .step{display:flex; align-items:center; gap:10px; margin:10px 0; font-weight:700;}
+  .how .chk{width:26px; height:26px; flex:0 0 auto; border-radius:50%; background:var(--sky-deep);
+    display:grid; place-items:center; color:var(--duck); font-weight:900;}
+  .how .em{color:var(--duck);}
+
+  .toast{position:fixed; left:50%; bottom:96px; transform:translateX(-50%);
+    background:#10242e; color:#fff; padding:10px 18px; border-radius:999px; font-weight:700;
+    font-size:14px; opacity:0; transition:opacity .25s; pointer-events:none; z-index:50;}
+  .toast.show{opacity:1;}
+
+  /* ---- bottom nav ---- */
+  nav{flex:0 0 auto; background:var(--sky-dark);
+    padding:8px 6px calc(env(safe-area-inset-bottom) + 8px);
+    display:flex; box-shadow:0 -2px 10px rgba(0,0,0,.12);}
+  nav button{flex:1; background:none; border:none; color:rgba(255,255,255,.6);
+    font-family:inherit; font-weight:800; font-size:11px; padding:6px 0; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:3px; border-radius:14px;}
+  nav button .gl{font-size:20px; line-height:1;}
+  nav button.on{color:#fff; background:rgba(255,255,255,.16);}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="t">DUCKY</div>
+    <div class="s">미니 앱</div>
+    <div class="menu">···</div>
+  </header>
+
+  <main>
+    <!-- ============ HOME ============ -->
+    <section class="screen active" id="home">
+      <div class="balance">
+        <span class="lbl">$Ducky point</span>
+        <span class="val" id="balance">0</span>
+      </div>
+
+      <div class="banner">
+        <b>Earn more<br>$Ducky point</b>
+        <button class="pill" onclick="toast('게임 목록은 준비 중이에요')">PLAY GAMES</button>
+      </div>
+
+      <div class="tapwrap" id="tapwrap">
+        <svg id="duck" viewBox="0 0 200 200" aria-label="오리 탭">
+          <ellipse cx="100" cy="178" rx="62" ry="12" fill="rgba(0,0,0,.12)"/>
+          <path d="M62 96c-30-6-44 22-20 30 0 34 30 56 60 56s58-22 58-58c0-30-26-52-58-52-16 0-30 8-40 24z" fill="#FFD23D" stroke="#10242E" stroke-width="5"/>
+          <circle cx="118" cy="92" r="9" fill="#10242E"/>
+          <circle cx="121" cy="89" r="3" fill="#fff"/>
+          <path d="M150 100c22-2 30 8 30 14 0 7-10 13-30 11z" fill="#F4732A" stroke="#10242E" stroke-width="5" stroke-linejoin="round"/>
+          <path d="M150 116c14 2 22-2 28-6" fill="none" stroke="#10242E" stroke-width="4" stroke-linecap="round"/>
+          <path d="M78 120c10 8 26 8 36 0" fill="none" stroke="#10242E" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <div class="meter">
+        <div class="row">
+          <span><span class="star">★</span> <span id="tapCount">0</span>/100</span>
+          <span id="timer">00:17:00</span>
+        </div>
+        <div class="bar"><i id="barFill"></i></div>
+      </div>
+
+      <div class="claimrow">
+        <button class="pill" id="claimBtn" disabled>CLAIM $Ducky point</button>
+      </div>
+    </section>
+
+    <!-- ============ TASKS ============ -->
+    <section class="screen" id="tasks">
+      <div class="daily">
+        <div><b>Claim Your Daily Rewards</b><div class="amt">🪙 250</div></div>
+        <button class="pill" id="dailyBtn" onclick="claimDaily(this)">CLAIM NOW</button>
+      </div>
+
+      <div class="sectionTitle">COMPLETE TASK,<br>TO EARN MORE $DUCKY POINT</div>
+
+      <div id="taskList"></div>
+    </section>
+
+    <!-- ============ INVITE ============ -->
+    <section class="screen" id="invite">
+      <div class="hero"><div class="big">🚀🐤</div></div>
+
+      <div class="refcard">
+        <div class="lbl">My Referral Code</div>
+        <div class="code">
+          <b id="refCode">DUCKY000000</b>
+          <button class="cp" onclick="copyCode()">⧉</button>
+        </div>
+        <button class="pill" onclick="shareInvite()">INVITE FRIENDS</button>
+      </div>
+
+      <div class="how">
+        <h4>HOW IT WORKS</h4>
+        <div class="step"><span class="chk">✓</span> Share your invitation link</div>
+        <div class="step"><span class="chk">✓</span> Your friends join</div>
+        <div class="step"><span class="chk">✓</span> 1 friend = <span class="em">&nbsp;100 $Ducky point</span></div>
+      </div>
+    </section>
+  </main>
+
+  <nav>
+    <button class="on" data-tab="home"><span class="gl">⌂</span>Home</button>
+    <button data-tab="tasks"><span class="gl">▦</span>Tasks</button>
+    <button data-tab="invite"><span class="gl">＋</span>Invite</button>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* ---------- anonymous identity (prototype: localStorage) ---------- */
+function getId(){
+  let id = localStorage.getItem('ducky_id');
+  if(!id){ id = 'DUCKY' + Math.floor(100000 + Math.random()*900000); localStorage.setItem('ducky_id', id); }
+  return id;
+}
+/* ---------- persisted state ---------- */
+const S = JSON.parse(localStorage.getItem('ducky_state') || '{}');
+const state = Object.assign({ balance:0, taps:0, claimedDaily:false, doneTasks:[] }, S);
+function save(){ localStorage.setItem('ducky_state', JSON.stringify(state)); }
+
+const CAP = 100;            // taps to fill a round
+const $ = s => document.querySelector(s);
+
+/* ---------- render ---------- */
+function render(){
+  $('#balance').textContent = state.balance.toLocaleString();
+  $('#tapCount').textContent = state.taps;
+  $('#barFill').style.width = Math.min(100, state.taps/CAP*100) + '%';
+  const full = state.taps >= CAP;
+  $('#claimBtn').disabled = !full;
+  $('#claimBtn').textContent = full ? `CLAIM ${CAP} $Ducky point` : 'CLAIM $Ducky point';
+  $('#refCode').textContent = getId();
+}
+
+/* ---------- tap core (pointerdown = no 300ms delay, fast taps) ---------- */
+const duck = $('#duck'), wrap = $('#tapwrap');
+function onTap(e){
+  e.preventDefault();
+  if(state.taps >= CAP) return;          // round full → must claim
+  state.taps++;
+  duck.classList.add('bounce');
+  setTimeout(()=>duck.classList.remove('bounce'), 70);
+  // floating +1 at touch point
+  const r = wrap.getBoundingClientRect();
+  const x = (e.touches? e.touches[0].clientX : e.clientX) - r.left;
+  const y = (e.touches? e.touches[0].clientY : e.clientY) - r.top;
+  const f = document.createElement('span');
+  f.className='float'; f.textContent='+1'; f.style.left=x+'px'; f.style.top=y+'px';
+  wrap.appendChild(f); setTimeout(()=>f.remove(), 700);
+  render(); save();
+}
+duck.addEventListener('pointerdown', onTap);
+
+/* ---------- claim ---------- */
+$('#claimBtn').addEventListener('click', ()=>{
+  if(state.taps < CAP) return;
+  state.balance += CAP; state.taps = 0;
+  render(); save(); toast(`+${CAP} 적립!`);
+});
+
+/* ---------- daily ---------- */
+function claimDaily(btn){
+  if(state.claimedDaily) return;
+  state.balance += 250; state.claimedDaily = true;
+  btn.textContent='CLAIMED'; btn.classList.add('done'); btn.disabled=true;
+  render(); save(); toast('+250 데일리 적립!');
+}
+
+/* ---------- tasks ---------- */
+const TASKS = [
+  {id:'wallet', ico:'#1FA8E8', sym:'◈', title:'Connect Wallet', amt:500},
+  {id:'x',      ico:'#10242E', sym:'𝕏', title:'Follow Our X',   amt:250},
+  {id:'tg',     ico:'#34AADF', sym:'✈', title:'Join TG Channel',amt:200},
+  {id:'inv',    ico:'#F4B400', sym:'👥', title:'Invite 5 Friends',amt:350},
+];
+function buildTasks(){
+  const wrap = $('#taskList'); wrap.innerHTML='';
+  TASKS.forEach(t=>{
+    const done = state.doneTasks.includes(t.id);
+    const el = document.createElement('div'); el.className='card'; el.style.marginBottom='14px';
+    el.innerHTML = `<div class="task">
+        <div class="ico" style="background:${t.ico}">${t.sym}</div>
+        <div class="mid"><div class="ttl">${t.title}</div><div class="amt">🪙 ${t.amt}</div></div>
+        <button class="pill ${done?'done':''}" ${done?'disabled':''}>${done?'DONE':'CHECK'}</button>
+      </div>`;
+    el.querySelector('button').addEventListener('click', function(){
+      if(state.doneTasks.includes(t.id)) return;
+      // prototype: trust-based check (real web build needs API/bot verification)
+      state.doneTasks.push(t.id); state.balance += t.amt;
+      this.textContent='DONE'; this.classList.add('done'); this.disabled=true;
+      render(); save(); toast(`+${t.amt} 적립!`);
+    });
+    wrap.appendChild(el);
+  });
+}
+
+/* ---------- invite ---------- */
+function copyCode(){
+  navigator.clipboard?.writeText(getId());
+  toast('코드 복사됨');
+}
+function shareInvite(){
+  const url = location.origin + location.pathname + '?ref=' + getId();
+  if(navigator.share){ navigator.share({title:'DUCKY', text:'같이 모으자!', url}); }
+  else { navigator.clipboard?.writeText(url); toast('초대링크 복사됨'); }
+}
+
+/* ---------- tabs ---------- */
+document.querySelectorAll('nav button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+    b.classList.add('on');
+    $('#'+b.dataset.tab).classList.add('active');
+  });
+});
+
+/* ---------- countdown (cosmetic daily timer; resync on resume) ---------- */
+let endAt = Number(localStorage.getItem('ducky_end') || 0);
+if(!endAt || endAt < Date.now()){ endAt = Date.now() + 17*60*1000; localStorage.setItem('ducky_end', endAt); }
+function tick(){
+  let ms = endAt - Date.now();
+  if(ms <= 0){ endAt = Date.now() + 17*60*1000; localStorage.setItem('ducky_end', endAt); ms = endAt - Date.now(); }
+  const s = Math.floor(ms/1000);
+  $('#timer').textContent = '00:' + String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
+}
+setInterval(tick, 1000);
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) tick(); }); // resync after background
+
+/* ---------- toast ---------- */
+let toT;
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toT); toT=setTimeout(()=>t.classList.remove('show'),1600); }
+
+/* ---------- daily button initial state ---------- */
+if(state.claimedDaily){ const b=$('#dailyBtn'); b.textContent='CLAIMED'; b.classList.add('done'); b.disabled=true; }
+
+buildTasks(); render(); tick();
+</script>
+</body>
+</html>
