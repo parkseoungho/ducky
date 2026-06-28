@@ -156,11 +156,18 @@
   .game-x{width:42px; height:42px; border-radius:50%; border:none; background:#fff; color:var(--ink-soft);
     font-size:18px; font-weight:800; cursor:pointer; box-shadow:0 4px 0 rgba(0,0,0,.1); flex:0 0 auto;}
   .board{position:relative; background:rgba(255,255,255,.35); border-radius:18px; padding:6px;
-    width:100%; aspect-ratio:1; touch-action:manipulation; overflow:hidden;}
+    width:100%; aspect-ratio:1; touch-action:none; overflow:hidden;}
   .tile{position:absolute; top:0; left:0; display:flex; align-items:center; justify-content:center;
-    border-radius:12px; background:rgba(255,255,255,.55); cursor:pointer; user-select:none;
+    border-radius:12px; background:rgba(255,255,255,.55); cursor:pointer; user-select:none; touch-action:none;
     transition:transform .19s cubic-bezier(.34,1.15,.64,1), opacity .17s ease; will-change:transform;}
   .tile.sel{outline:3px solid var(--duck-deep); outline-offset:-3px; background:#fff; z-index:3;}
+  .fx{position:absolute; pointer-events:none; z-index:6;}
+  .fx-ring{border:3px solid var(--c,#fff); border-radius:50%; animation:ring .46s ease-out forwards;}
+  @keyframes ring{from{transform:translate(-50%,-50%) scale(.35); opacity:.85} to{transform:translate(-50%,-50%) scale(1.7); opacity:0}}
+  .fx-spark{width:9px; height:9px; border-radius:50%; background:var(--c,#fff); box-shadow:0 0 6px var(--c,#fff);
+    animation:spark .52s ease-out forwards;}
+  @keyframes spark{from{transform:translate(-50%,-50%); opacity:1}
+    to{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))); opacity:0}}
   .gresult{position:absolute; inset:0; background:rgba(8,20,28,.6); display:none; flex-direction:column;
     align-items:center; justify-content:center; z-index:46; padding:24px;}
   .gresult.show{display:flex;}
@@ -407,15 +414,44 @@ function updateHud(){ $('#gCollected').textContent=M.collected; $('#gGoal').text
 function adjacent(i,j){ const a=rc(i), b=rc(j); return Math.abs(a[0]-b[0])+Math.abs(a[1]-b[1])===1; }
 function swapGrid(i,j){ const t=M.grid[i]; M.grid[i]=M.grid[j]; M.grid[j]=t; }
 
-$('#board').addEventListener('pointerdown', e=>{
+/* 드래그 프리뷰 스와이프: 누른 채 밀면 타일이 손가락을 따라오고, 놓으면 확정/취소 */
+const _board=$('#board'); let _g=null; const LOCK=6;
+function _drag(t, idx, ox, oy){ const p=rc(idx), a=xy(p[0],p[1]);
+  t.el.style.transform=`translate(${a[0]+ox}px,${a[1]+oy}px) scale(1)`; }
+_board.addEventListener('pointerdown', e=>{
   if(M.busy) return; const el=e.target.closest('.tile'); if(!el) return;
   const i=M.grid.findIndex(t=>t&&t.el===el); if(i<0) return;
-  if(!M.selEl){ M.selEl=el; el.classList.add('sel'); return; }
-  if(M.selEl===el){ el.classList.remove('sel'); M.selEl=null; return; }
-  const j=M.grid.findIndex(t=>t&&t.el===M.selEl);
-  M.selEl.classList.remove('sel'); M.selEl=null;
-  if(j>=0 && adjacent(i,j)) trySwap(i,j); else { el.classList.add('sel'); M.selEl=el; }
+  _g={i, x:e.clientX, y:e.clientY, locked:false, axis:null, dir:0, j:-1, off:0};
+  el.classList.add('sel');
+  try{ _board.setPointerCapture(e.pointerId); }catch(_){}
+  e.preventDefault();
 });
+_board.addEventListener('pointermove', e=>{
+  if(!_g || M.busy) return;
+  const dx=e.clientX-_g.x, dy=e.clientY-_g.y;
+  if(!_g.locked){
+    if(Math.abs(dx)<LOCK && Math.abs(dy)<LOCK) return;
+    _g.locked=true; _g.axis = Math.abs(dx)>Math.abs(dy)?'h':'v';
+    const p=rc(_g.i), r=p[0], c=p[1];
+    if(_g.axis==='h'){ _g.dir=dx>0?1:-1; _g.j=(_g.dir>0&&c<M.cols-1)?_g.i+1:(_g.dir<0&&c>0)?_g.i-1:-1; }
+    else { _g.dir=dy>0?1:-1; _g.j=(_g.dir>0&&r<M.rows-1)?_g.i+M.cols:(_g.dir<0&&r>0)?_g.i-M.cols:-1; }
+    const ti=M.grid[_g.i]; if(ti) ti.el.style.transition='none';
+    const tj=_g.j>=0?M.grid[_g.j]:null; if(tj){ tj.el.style.transition='none'; tj.el.style.zIndex='2'; }
+  }
+  let off=(_g.axis==='h'?dx:dy)*_g.dir; if(off<0)off=0; if(off>M.cell)off=M.cell; _g.off=off;
+  const s=off*_g.dir, ti=M.grid[_g.i];
+  if(ti) _drag(ti,_g.i, _g.axis==='h'?s:0, _g.axis==='v'?s:0);
+  if(_g.j>=0){ const tj=M.grid[_g.j]; if(tj) _drag(tj,_g.j, _g.axis==='h'?-s:0, _g.axis==='v'?-s:0); }
+});
+function _endG(){
+  if(!_g) return; const g=_g; _g=null;
+  const ti=M.grid[g.i]; if(ti){ ti.el.classList.remove('sel'); ti.el.style.transition=''; }
+  const tj=g.j>=0?M.grid[g.j]:null; if(tj){ tj.el.style.transition=''; tj.el.style.zIndex=''; }
+  if(g.j>=0 && g.off>=M.cell*0.4){ trySwap(g.i, g.j); }       // 절반 넘게 끌면 확정
+  else { placeIdx(g.i); if(g.j>=0) placeIdx(g.j); }           // 아니면 제자리로 스냅
+}
+_board.addEventListener('pointerup', _endG);
+_board.addEventListener('pointercancel', _endG);
 
 function findMatches(){ const m=new Set();
   for(let r=0;r<M.rows;r++){ let run=1;
@@ -439,10 +475,27 @@ async function trySwap(i,j){
   M.busy=false; checkEnd();
 }
 
+/* 소멸 이펙트: 타일이 사라질 때 링 + 스파크 파티클 */
+const TCOLOR={'🐤':'#FFD23D','🐱':'#FF9E45','🐻':'#C98A5E','🐰':'#FF9DC0','🐸':'#7CCB4E','🦊':'#FF7A45'};
+function burst(cx,cy,color){
+  const b=$('#board');
+  const ring=document.createElement('div'); ring.className='fx fx-ring';
+  ring.style.left=cx+'px'; ring.style.top=cy+'px';
+  ring.style.width=ring.style.height=(M.cell*0.9|0)+'px'; ring.style.setProperty('--c',color);
+  b.appendChild(ring); setTimeout(()=>ring.remove(),470);
+  for(let k=0;k<5;k++){ const s=document.createElement('div'); s.className='fx fx-spark';
+    s.style.left=cx+'px'; s.style.top=cy+'px'; s.style.setProperty('--c',color);
+    const ang=Math.random()*6.283, d=M.cell*(0.45+Math.random()*0.55);
+    s.style.setProperty('--dx',(Math.cos(ang)*d).toFixed(1)+'px');
+    s.style.setProperty('--dy',(Math.sin(ang)*d).toFixed(1)+'px');
+    b.appendChild(s); setTimeout(()=>s.remove(),540); }
+}
+
 async function resolve(){
   while(true){
     const m=findMatches(); if(m.size===0) break;
     m.forEach(i=>{ const t=M.grid[i]; if(!t)return; if(t.type===M.target) M.collected++; M.tiles++;
+      const p=rc(i), a=xy(p[0],p[1]); burst(a[0]+M.cell/2, a[1]+M.cell/2, TCOLOR[t.type]||'#fff');
       t.el.style.opacity='0'; placeIdx(i,0.2); }); updateHud();
     await sleep(190);
     m.forEach(i=>{ const t=M.grid[i]; if(t){ t.el.remove(); M.grid[i]=null; } });
