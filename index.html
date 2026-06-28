@@ -9,68 +9,47 @@
   :root{
     --sky:#26B5EE; --sky-dark:#1C9FD6; --sky-deep:#0E7FB3;
     --duck:#FFD23D; --duck-deep:#F4B400;
-    --btn:#FFD400; --btn-press:#E8BE00;
-    --ink:#10242E; --ink-soft:#3A5663;
-    --card:#FFFFFF; --green:#7CCB4E; --green-on:#2E7D32;
-    --pond:#39C0F2;
-    --shadow:0 6px 0 rgba(0,0,0,.12);
+    --btn:#FFD400; --ink:#10242E; --ink-soft:#3A5663;
+    --card:#FFFFFF; --green:#7CCB4E; --shadow:0 6px 0 rgba(0,0,0,.12);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0; height:100%;}
-  body{
-    font-family:"Baloo 2","Comic Sans MS",system-ui,-apple-system,sans-serif;
-    background:#0b1418; color:var(--ink);
-    user-select:none; -webkit-user-select:none;
-    overscroll-behavior:none;
-  }
-  /* phone frame so it's usable on desktop too; full-bleed on real phones */
-  #app{
-    position:relative; margin:0 auto; max-width:430px; width:100%;
-    height:100dvh; display:flex; flex-direction:column;
-    background:var(--sky); overflow:hidden;
-  }
-  /* ---- header ---- */
-  header{
-    flex:0 0 auto; background:#fff; color:var(--ink);
-    padding:calc(env(safe-area-inset-top) + 10px) 16px 12px;
-    text-align:center; box-shadow:0 2px 8px rgba(0,0,0,.08); z-index:5;
-  }
+  body{font-family:"Baloo 2","Comic Sans MS",system-ui,-apple-system,sans-serif;
+    background:#0b1418; color:var(--ink); user-select:none; -webkit-user-select:none; overscroll-behavior:none;}
+  #app{position:relative; margin:0 auto; max-width:430px; width:100%; height:100dvh;
+    display:flex; flex-direction:column; background:var(--sky); overflow:hidden;}
+
+  header{flex:0 0 auto; background:#fff; color:var(--ink);
+    padding:calc(env(safe-area-inset-top) + 10px) 16px 12px; text-align:center;
+    box-shadow:0 2px 8px rgba(0,0,0,.08); z-index:5;}
   header .t{font-weight:800; font-size:20px; letter-spacing:1px;}
   header .s{font-size:12px; color:#9aa7ad; margin-top:-2px;}
   header .menu{position:absolute; right:14px; top:calc(env(safe-area-inset-top) + 12px);
     width:30px; height:30px; border:2px solid var(--sky); border-radius:50%;
     color:var(--sky); display:grid; place-items:center; font-weight:800;}
 
-  /* ---- screens ---- */
   main{flex:1 1 auto; position:relative; overflow:hidden;}
   .screen{position:absolute; inset:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
-    padding:16px 16px 16px; display:none; animation:fade .2s ease;}
+    padding:16px; display:none; animation:fade .2s ease;}
   .screen.active{display:block;}
   @keyframes fade{from{opacity:0} to{opacity:1}}
 
-  .pill{display:inline-flex; align-items:center; justify-content:center; gap:6px;
-    background:var(--btn); color:var(--ink); font-weight:800; border:none;
-    border-radius:999px; padding:14px 22px; font-size:15px; cursor:pointer;
-    box-shadow:var(--shadow); touch-action:manipulation; transition:transform .05s;}
+  .pill{display:inline-flex; align-items:center; justify-content:center; gap:6px; background:var(--btn);
+    color:var(--ink); font-weight:800; border:none; border-radius:999px; padding:14px 22px; font-size:15px;
+    cursor:pointer; box-shadow:var(--shadow); touch-action:manipulation; transition:transform .05s;}
   .pill:active{transform:translateY(3px); box-shadow:0 3px 0 rgba(0,0,0,.12);}
   .pill[disabled]{background:#cfe8d4; color:#7da884; box-shadow:none; cursor:not-allowed;}
-
   .card{background:var(--card); border-radius:22px; padding:18px; box-shadow:0 8px 20px rgba(0,0,0,.10);}
-  .coin{width:22px; height:22px; vertical-align:-5px;}
 
-  /* ---- HOME ---- */
+  /* HOME */
   .balance{background:rgba(255,255,255,.18); border-radius:18px; padding:16px 18px;
-    display:flex; justify-content:space-between; align-items:center; color:#fff;
-    backdrop-filter:blur(2px);}
+    display:flex; justify-content:space-between; align-items:center; color:#fff;}
   .balance .lbl{font-weight:800; color:var(--duck); font-size:22px; text-shadow:0 1px 0 rgba(0,0,0,.15);}
   .balance .val{font-weight:800; font-size:24px;}
-
-  .banner{margin-top:14px; border-radius:18px; padding:16px;
-    background:linear-gradient(90deg,#1f9fd6,#43c4f0); color:#fff;
-    display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .banner{margin-top:14px; border-radius:18px; padding:16px; background:linear-gradient(90deg,#1f9fd6,#43c4f0);
+    color:#fff; display:flex; align-items:center; justify-content:space-between; gap:10px;}
   .banner b{font-size:16px; line-height:1.15; display:block;}
   .banner .pill{padding:11px 16px; font-size:13px;}
-
   .tapwrap{position:relative; text-align:center; margin-top:18px; height:240px;
     display:flex; align-items:center; justify-content:center;}
   #duck{width:180px; height:180px; cursor:pointer; touch-action:manipulation;
@@ -79,146 +58,165 @@
   .float{position:absolute; font-weight:800; color:var(--duck-deep); font-size:22px;
     pointer-events:none; text-shadow:0 1px 0 #fff; animation:rise .7s ease-out forwards;}
   @keyframes rise{from{opacity:1; transform:translateY(0)} to{opacity:0; transform:translateY(-50px)}}
-
   .meter{margin-top:4px;}
   .meter .row{display:flex; justify-content:space-between; color:#fff; font-weight:800; font-size:18px; padding:0 4px;}
   .meter .star{color:var(--duck);}
   .bar{height:16px; background:rgba(255,255,255,.45); border-radius:999px; margin:10px 0 16px; overflow:hidden;}
-  .bar > i{display:block; height:100%; width:0%; background:var(--duck);
-    border-radius:999px; transition:width .12s ease;}
+  .bar > i{display:block; height:100%; width:0%; background:var(--duck); border-radius:999px; transition:width .12s ease;}
   .claimrow{text-align:center;}
   .claimrow .pill{width:100%; background:var(--green); color:#1f5d22;}
   .claimrow .pill[disabled]{background:#cfe8d4; color:#7da884;}
 
-  /* ---- TASKS ---- */
+  /* TASKS */
   .sectionTitle{color:var(--duck); font-weight:800; font-size:18px; line-height:1.2;
     text-shadow:0 1px 0 rgba(0,0,0,.12); margin:18px 4px 12px;}
-  .daily{background:linear-gradient(120deg,#43c4f0,#1f9fd6); color:#fff; border-radius:22px;
-    padding:18px; display:flex; align-items:center; justify-content:space-between; gap:10px;
-    box-shadow:0 8px 20px rgba(0,0,0,.12);}
+  .daily{background:linear-gradient(120deg,#43c4f0,#1f9fd6); color:#fff; border-radius:22px; padding:18px;
+    display:flex; align-items:center; justify-content:space-between; gap:10px; box-shadow:0 8px 20px rgba(0,0,0,.12);}
   .daily b{font-size:17px; display:block;} .daily .amt{font-weight:800; margin-top:4px;}
-  .task{display:flex; align-items:center; gap:12px; margin-bottom:14px;}
-  .task .ico{width:46px; height:46px; flex:0 0 auto; border-radius:14px; display:grid; place-items:center;
-    color:#fff; font-weight:800; font-size:18px;}
+  .task{display:flex; align-items:center; gap:12px;}
+  .task .ico{width:46px; height:46px; flex:0 0 auto; border-radius:14px; display:grid; place-items:center; color:#fff; font-weight:800; font-size:18px;}
   .task .mid{flex:1 1 auto;}
   .task .ttl{font-weight:800; font-size:15px;}
   .task .amt{color:var(--ink-soft); font-weight:800; font-size:14px; margin-top:2px;}
   .task .pill{padding:10px 18px; font-size:13px;}
   .task .pill.done{background:#dff3e2; color:#3a9b50; box-shadow:none;}
 
-  /* ---- INVITE ---- */
-  .hero{height:200px; border-radius:22px; background:
-     radial-gradient(120% 120% at 70% 20%,#5b2a9e,#1b0f3a);
-     display:grid; place-items:center; color:#fff; position:relative; overflow:hidden;}
-  .hero .star{position:absolute; width:3px; height:3px; background:#fff; border-radius:50%; opacity:.8;}
+  /* INVITE */
+  .hero{height:200px; border-radius:22px; background:radial-gradient(120% 120% at 70% 20%,#5b2a9e,#1b0f3a);
+    display:grid; place-items:center; color:#fff; overflow:hidden;}
   .hero .big{font-size:64px;}
   .refcard{margin-top:14px; background:var(--sky-deep); border-radius:22px; padding:18px; color:#fff;}
   .refcard .lbl{font-weight:700; opacity:.95;}
   .refcard .code{display:flex; align-items:center; gap:10px; margin-top:6px;}
   .refcard .code b{color:var(--duck); font-size:24px; letter-spacing:1px;}
-  .refcard .cp{background:rgba(255,255,255,.2); border:none; color:#fff; border-radius:10px;
-    padding:6px 9px; cursor:pointer; font-size:14px;}
+  .refcard .cp{background:rgba(255,255,255,.2); border:none; color:#fff; border-radius:10px; padding:6px 9px; cursor:pointer; font-size:14px;}
   .refcard .pill{margin-top:14px; width:100%;}
   .how{margin-top:14px; background:rgba(255,255,255,.18); border-radius:22px; padding:18px; color:#fff;}
   .how h4{margin:0 0 12px; font-size:16px;}
   .how .step{display:flex; align-items:center; gap:10px; margin:10px 0; font-weight:700;}
-  .how .chk{width:26px; height:26px; flex:0 0 auto; border-radius:50%; background:var(--sky-deep);
-    display:grid; place-items:center; color:var(--duck); font-weight:900;}
+  .how .chk{width:26px; height:26px; flex:0 0 auto; border-radius:50%; background:var(--sky-deep); display:grid; place-items:center; color:var(--duck); font-weight:900;}
   .how .em{color:var(--duck);}
 
-  .toast{position:fixed; left:50%; bottom:96px; transform:translateX(-50%);
-    background:#10242e; color:#fff; padding:10px 18px; border-radius:999px; font-weight:700;
-    font-size:14px; opacity:0; transition:opacity .25s; pointer-events:none; z-index:50;}
+  .toast{position:fixed; left:50%; bottom:96px; transform:translateX(-50%); background:#10242e; color:#fff;
+    padding:10px 18px; border-radius:999px; font-weight:700; font-size:14px; opacity:0; transition:opacity .25s;
+    pointer-events:none; z-index:60;}
   .toast.show{opacity:1;}
 
-  /* ---- bottom nav ---- */
-  nav{flex:0 0 auto; background:var(--sky-dark);
-    padding:8px 6px calc(env(safe-area-inset-bottom) + 8px);
+  nav{flex:0 0 auto; background:var(--sky-dark); padding:8px 6px calc(env(safe-area-inset-bottom) + 8px);
     display:flex; box-shadow:0 -2px 10px rgba(0,0,0,.12);}
-  nav button{flex:1; background:none; border:none; color:rgba(255,255,255,.6);
-    font-family:inherit; font-weight:800; font-size:11px; padding:6px 0; cursor:pointer;
-    display:flex; flex-direction:column; align-items:center; gap:3px; border-radius:14px;}
+  nav button{flex:1; background:none; border:none; color:rgba(255,255,255,.6); font-family:inherit;
+    font-weight:800; font-size:11px; padding:6px 0; cursor:pointer; display:flex; flex-direction:column;
+    align-items:center; gap:3px; border-radius:14px;}
   nav button .gl{font-size:20px; line-height:1;}
   nav button.on{color:#fff; background:rgba(255,255,255,.16);}
+
+  /* GAME PICKER */
+  .backdrop{position:absolute; inset:0; background:rgba(8,20,28,.55); opacity:0; pointer-events:none; transition:opacity .25s; z-index:40;}
+  .backdrop.show{opacity:1; pointer-events:auto;}
+  .sheet{position:absolute; left:0; right:0; bottom:0; z-index:41; background:var(--sky); border-radius:28px 28px 0 0;
+    padding:24px 20px calc(env(safe-area-inset-bottom) + 20px); transform:translateY(110%);
+    transition:transform .3s cubic-bezier(.2,.8,.2,1); box-shadow:0 -8px 30px rgba(0,0,0,.25); max-width:430px; margin:0 auto;}
+  .sheet.show{transform:translateY(0);}
+  .sheet h3{text-align:center; color:var(--duck); font-size:24px; font-weight:800; margin:4px 0 20px; text-shadow:0 2px 0 rgba(0,0,0,.15); letter-spacing:1px;}
+  .gcard{background:rgba(255,255,255,.22); border-radius:18px; padding:18px; margin-bottom:16px; display:flex;
+    align-items:center; justify-content:space-between; cursor:pointer; touch-action:manipulation; transition:transform .06s;}
+  .gcard:active{transform:scale(.98);}
+  .gcard .gname{color:var(--duck); font-weight:800; font-size:20px;}
+  .gcard .gsub{color:#fff; font-weight:700; font-size:13px; margin-top:2px;}
+  .gcard .gearn{color:#fff; font-weight:800; font-size:17px; text-align:right;}
+  .gcard.locked{opacity:.85;}
+  .sheet .pill{width:100%; margin-top:6px;}
+
+  /* STAGE MAP */
+  .stagemap{position:absolute; inset:0; z-index:44; background:linear-gradient(#86d6f5,#2ea6df);
+    display:none; flex-direction:column;}
+  .stagemap.show{display:flex;}
+  .map-top{flex:0 0 auto; display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:calc(env(safe-area-inset-top) + 10px) 16px 12px; background:rgba(255,255,255,.14); z-index:2;}
+  .map-top .pt{color:#fff; font-weight:800; font-size:18px;}
+  .map-scroll{flex:1 1 auto; overflow-y:auto; -webkit-overflow-scrolling:touch; position:relative;}
+  .map-inner{position:relative; width:100%;}
+  .node{position:absolute; width:62px; height:62px; transform:translate(-50%,-50%); border-radius:50%;
+    display:grid; place-items:center; font-weight:800; font-size:22px; border:none; cursor:pointer;
+    box-shadow:0 5px 0 rgba(0,0,0,.18); font-family:inherit;}
+  .node.done{background:var(--duck); color:#7a5a00;}
+  .node.cur{background:#fff; color:var(--sky-deep); animation:pulse 1.2s infinite;}
+  .node.lock{background:#a7bcc6; color:#e6eef2; cursor:not-allowed; box-shadow:0 5px 0 rgba(0,0,0,.12);}
+  .node .star{position:absolute; top:-12px; font-size:18px;}
+  @keyframes pulse{0%,100%{transform:translate(-50%,-50%) scale(1)} 50%{transform:translate(-50%,-50%) scale(1.12)}}
+
+  /* MATCH-3 (persistent animated tiles) */
+  .game{position:absolute; inset:0; z-index:45; background:linear-gradient(#bfe9fb,#8fd9f4);
+    display:none; flex-direction:column; padding:calc(env(safe-area-inset-top) + 10px) 14px 14px;}
+  .game.show{display:flex;}
+  .game-top{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px;}
+  .hud{background:#fff; border-radius:16px; padding:8px 14px; text-align:center; min-width:84px; box-shadow:0 4px 0 rgba(0,0,0,.1);}
+  .hud .k{font-size:12px; color:var(--ink-soft); font-weight:800;}
+  .hud .v{font-size:22px; font-weight:800; color:var(--ink);}
+  .game-x{width:42px; height:42px; border-radius:50%; border:none; background:#fff; color:var(--ink-soft);
+    font-size:18px; font-weight:800; cursor:pointer; box-shadow:0 4px 0 rgba(0,0,0,.1); flex:0 0 auto;}
+  .board{position:relative; background:rgba(255,255,255,.35); border-radius:18px; padding:6px;
+    width:100%; aspect-ratio:1; touch-action:manipulation; overflow:hidden;}
+  .tile{position:absolute; top:0; left:0; display:flex; align-items:center; justify-content:center;
+    border-radius:12px; background:rgba(255,255,255,.55); cursor:pointer; user-select:none;
+    transition:transform .19s cubic-bezier(.34,1.15,.64,1), opacity .17s ease; will-change:transform;}
+  .tile.sel{outline:3px solid var(--duck-deep); outline-offset:-3px; background:#fff; z-index:3;}
+  .gresult{position:absolute; inset:0; background:rgba(8,20,28,.6); display:none; flex-direction:column;
+    align-items:center; justify-content:center; z-index:46; padding:24px;}
+  .gresult.show{display:flex;}
+  .gresult .panel{background:#fff; border-radius:24px; padding:28px; text-align:center; width:100%; max-width:300px;}
+  .gresult h4{margin:0 0 6px; font-size:24px; color:var(--ink);}
+  .gresult .earn{font-size:20px; font-weight:800; color:var(--duck-deep); margin:8px 0 18px;}
+  .gresult .pill{width:100%;}
 </style>
 </head>
 <body>
 <div id="app">
   <header>
-    <div class="t">DUCKY</div>
-    <div class="s">미니 앱</div>
-    <div class="menu">···</div>
+    <div class="t">DUCKY</div><div class="s">미니 앱</div><div class="menu">···</div>
   </header>
 
   <main>
-    <!-- ============ HOME ============ -->
+    <!-- HOME -->
     <section class="screen active" id="home">
-      <div class="balance">
-        <span class="lbl">$Ducky point</span>
-        <span class="val" id="balance">0</span>
-      </div>
-
-      <div class="banner">
-        <b>Earn more<br>$Ducky point</b>
-        <button class="pill" onclick="toast('게임 목록은 준비 중이에요')">PLAY GAMES</button>
-      </div>
-
+      <div class="balance"><span class="lbl">$Ducky point</span><span class="val" id="balance">0</span></div>
+      <div class="banner"><b>Earn more<br>$Ducky point</b>
+        <button class="pill" onclick="openPicker()">PLAY GAMES</button></div>
       <div class="tapwrap" id="tapwrap">
         <svg id="duck" viewBox="0 0 200 200" aria-label="오리 탭">
           <ellipse cx="100" cy="178" rx="62" ry="12" fill="rgba(0,0,0,.12)"/>
           <path d="M62 96c-30-6-44 22-20 30 0 34 30 56 60 56s58-22 58-58c0-30-26-52-58-52-16 0-30 8-40 24z" fill="#FFD23D" stroke="#10242E" stroke-width="5"/>
-          <circle cx="118" cy="92" r="9" fill="#10242E"/>
-          <circle cx="121" cy="89" r="3" fill="#fff"/>
+          <circle cx="118" cy="92" r="9" fill="#10242E"/><circle cx="121" cy="89" r="3" fill="#fff"/>
           <path d="M150 100c22-2 30 8 30 14 0 7-10 13-30 11z" fill="#F4732A" stroke="#10242E" stroke-width="5" stroke-linejoin="round"/>
           <path d="M150 116c14 2 22-2 28-6" fill="none" stroke="#10242E" stroke-width="4" stroke-linecap="round"/>
           <path d="M78 120c10 8 26 8 36 0" fill="none" stroke="#10242E" stroke-width="4" stroke-linecap="round"/>
         </svg>
       </div>
-
       <div class="meter">
-        <div class="row">
-          <span><span class="star">★</span> <span id="tapCount">0</span>/100</span>
-          <span id="timer">00:17:00</span>
-        </div>
+        <div class="row"><span><span class="star">★</span> <span id="tapCount">0</span>/100</span><span id="timer">00:17:00</span></div>
         <div class="bar"><i id="barFill"></i></div>
       </div>
-
-      <div class="claimrow">
-        <button class="pill" id="claimBtn" disabled>CLAIM $Ducky point</button>
-      </div>
+      <div class="claimrow"><button class="pill" id="claimBtn" disabled>CLAIM $Ducky point</button></div>
     </section>
 
-    <!-- ============ TASKS ============ -->
+    <!-- TASKS -->
     <section class="screen" id="tasks">
-      <div class="daily">
-        <div><b>Claim Your Daily Rewards</b><div class="amt">🪙 250</div></div>
-        <button class="pill" id="dailyBtn" onclick="claimDaily(this)">CLAIM NOW</button>
-      </div>
-
+      <div class="daily"><div><b>Claim Your Daily Rewards</b><div class="amt">🪙 250</div></div>
+        <button class="pill" id="dailyBtn" onclick="claimDaily(this)">CLAIM NOW</button></div>
       <div class="sectionTitle">COMPLETE TASK,<br>TO EARN MORE $DUCKY POINT</div>
-
       <div id="taskList"></div>
     </section>
 
-    <!-- ============ INVITE ============ -->
+    <!-- INVITE -->
     <section class="screen" id="invite">
       <div class="hero"><div class="big">🚀🐤</div></div>
-
-      <div class="refcard">
-        <div class="lbl">My Referral Code</div>
-        <div class="code">
-          <b id="refCode">DUCKY000000</b>
-          <button class="cp" onclick="copyCode()">⧉</button>
-        </div>
-        <button class="pill" onclick="shareInvite()">INVITE FRIENDS</button>
-      </div>
-
-      <div class="how">
-        <h4>HOW IT WORKS</h4>
+      <div class="refcard"><div class="lbl">My Referral Code</div>
+        <div class="code"><b id="refCode">DUCKY000000</b><button class="cp" onclick="copyCode()">⧉</button></div>
+        <button class="pill" onclick="shareInvite()">INVITE FRIENDS</button></div>
+      <div class="how"><h4>HOW IT WORKS</h4>
         <div class="step"><span class="chk">✓</span> Share your invitation link</div>
         <div class="step"><span class="chk">✓</span> Your friends join</div>
-        <div class="step"><span class="chk">✓</span> 1 friend = <span class="em">&nbsp;100 $Ducky point</span></div>
-      </div>
+        <div class="step"><span class="chk">✓</span> 1 friend = <span class="em">&nbsp;100 $Ducky point</span></div></div>
     </section>
   </main>
 
@@ -228,137 +226,269 @@
     <button data-tab="invite"><span class="gl">＋</span>Invite</button>
   </nav>
 
+  <!-- game picker -->
+  <div class="backdrop" id="backdrop" onclick="closePicker()"></div>
+  <div class="sheet" id="picker">
+    <h3>CHOOSE GAMES</h3>
+    <div class="gcard" onclick="openToyPuzzle()">
+      <div><div class="gname">TOY PUZZLE</div><div class="gsub">FREE</div></div><div class="gearn">Earn 25 ~ 50</div></div>
+    <div class="gcard locked" onclick="toast('GATCHA는 준비 중이에요')">
+      <div><div class="gname">GATCHA</div><div class="gsub">SWAP 50 per games</div></div><div class="gearn">Earn 30 ~ 250</div></div>
+    <button class="pill" onclick="closePicker()">CLOSE</button>
+  </div>
+
+  <!-- stage map -->
+  <div class="stagemap" id="stagemap">
+    <div class="map-top">
+      <button class="game-x" onclick="closeStageMap()">🏠</button>
+      <div class="pt">🪙 <span id="mapPt">0</span></div>
+      <div style="width:42px"></div>
+    </div>
+    <div class="map-scroll" id="mapScroll"><div class="map-inner" id="mapInner"></div></div>
+  </div>
+
+  <!-- match-3 -->
+  <div class="game" id="game">
+    <div class="game-top">
+      <div class="hud"><div class="k">목표 <span id="gTarget"></span></div><div class="v"><span id="gCollected">0</span>/<span id="gGoal">0</span></div></div>
+      <div class="hud"><div class="k">이동</div><div class="v" id="gMoves">0</div></div>
+      <button class="game-x" onclick="quitGame()">✕</button>
+    </div>
+    <div class="board" id="board"></div>
+    <div class="gresult" id="gresult">
+      <div class="panel"><h4 id="grTitle">CLEAR!</h4><div class="earn" id="grEarn"></div>
+        <button class="pill" onclick="quitGame()">받고 나가기</button></div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 </div>
 
 <script>
-/* ---------- anonymous identity (prototype: localStorage) ---------- */
-function getId(){
-  let id = localStorage.getItem('ducky_id');
-  if(!id){ id = 'DUCKY' + Math.floor(100000 + Math.random()*900000); localStorage.setItem('ducky_id', id); }
-  return id;
-}
-/* ---------- persisted state ---------- */
-const S = JSON.parse(localStorage.getItem('ducky_state') || '{}');
-const state = Object.assign({ balance:0, taps:0, claimedDaily:false, doneTasks:[] }, S);
-function save(){ localStorage.setItem('ducky_state', JSON.stringify(state)); }
-
-const CAP = 100;            // taps to fill a round
 const $ = s => document.querySelector(s);
+function getId(){ let id=localStorage.getItem('ducky_id'); if(!id){ id='DUCKY'+Math.floor(100000+Math.random()*900000); localStorage.setItem('ducky_id',id);} return id; }
+const S = JSON.parse(localStorage.getItem('ducky_state')||'{}');
+const state = Object.assign({ balance:0, taps:0, claimedDaily:false, doneTasks:[], cleared:0 }, S);
+function save(){ localStorage.setItem('ducky_state', JSON.stringify(state)); }
+const CAP=100;
 
-/* ---------- render ---------- */
 function render(){
   $('#balance').textContent = state.balance.toLocaleString();
   $('#tapCount').textContent = state.taps;
-  $('#barFill').style.width = Math.min(100, state.taps/CAP*100) + '%';
-  const full = state.taps >= CAP;
+  $('#barFill').style.width = Math.min(100, state.taps/CAP*100)+'%';
+  const full = state.taps>=CAP;
   $('#claimBtn').disabled = !full;
   $('#claimBtn').textContent = full ? `CLAIM ${CAP} $Ducky point` : 'CLAIM $Ducky point';
   $('#refCode').textContent = getId();
 }
 
-/* ---------- tap core (pointerdown = no 300ms delay, fast taps) ---------- */
-const duck = $('#duck'), wrap = $('#tapwrap');
-function onTap(e){
-  e.preventDefault();
-  if(state.taps >= CAP) return;          // round full → must claim
-  state.taps++;
-  duck.classList.add('bounce');
-  setTimeout(()=>duck.classList.remove('bounce'), 70);
-  // floating +1 at touch point
-  const r = wrap.getBoundingClientRect();
-  const x = (e.touches? e.touches[0].clientX : e.clientX) - r.left;
-  const y = (e.touches? e.touches[0].clientY : e.clientY) - r.top;
-  const f = document.createElement('span');
-  f.className='float'; f.textContent='+1'; f.style.left=x+'px'; f.style.top=y+'px';
-  wrap.appendChild(f); setTimeout(()=>f.remove(), 700);
-  render(); save();
-}
-duck.addEventListener('pointerdown', onTap);
-
-/* ---------- claim ---------- */
-$('#claimBtn').addEventListener('click', ()=>{
-  if(state.taps < CAP) return;
-  state.balance += CAP; state.taps = 0;
-  render(); save(); toast(`+${CAP} 적립!`);
+/* TAP CORE */
+const duck=$('#duck'), wrap=$('#tapwrap');
+duck.addEventListener('pointerdown', e=>{
+  e.preventDefault(); if(state.taps>=CAP) return;
+  state.taps++; duck.classList.add('bounce'); setTimeout(()=>duck.classList.remove('bounce'),70);
+  const r=wrap.getBoundingClientRect();
+  const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left, y=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
+  const f=document.createElement('span'); f.className='float'; f.textContent='+1'; f.style.left=x+'px'; f.style.top=y+'px';
+  wrap.appendChild(f); setTimeout(()=>f.remove(),700); render(); save();
 });
+$('#claimBtn').addEventListener('click', ()=>{ if(state.taps<CAP) return; state.balance+=CAP; state.taps=0; render(); save(); toast(`+${CAP} 적립!`); });
 
-/* ---------- daily ---------- */
-function claimDaily(btn){
-  if(state.claimedDaily) return;
-  state.balance += 250; state.claimedDaily = true;
-  btn.textContent='CLAIMED'; btn.classList.add('done'); btn.disabled=true;
-  render(); save(); toast('+250 데일리 적립!');
-}
+/* DAILY */
+function claimDaily(btn){ if(state.claimedDaily) return; state.balance+=250; state.claimedDaily=true;
+  btn.textContent='CLAIMED'; btn.classList.add('done'); btn.disabled=true; render(); save(); toast('+250 데일리 적립!'); }
 
-/* ---------- tasks ---------- */
-const TASKS = [
-  {id:'wallet', ico:'#1FA8E8', sym:'◈', title:'Connect Wallet', amt:500},
-  {id:'x',      ico:'#10242E', sym:'𝕏', title:'Follow Our X',   amt:250},
-  {id:'tg',     ico:'#34AADF', sym:'✈', title:'Join TG Channel',amt:200},
-  {id:'inv',    ico:'#F4B400', sym:'👥', title:'Invite 5 Friends',amt:350},
+/* TASKS */
+const TASKS=[
+  {id:'wallet',ico:'#1FA8E8',sym:'◈',title:'Connect Wallet',amt:500},
+  {id:'x',ico:'#10242E',sym:'𝕏',title:'Follow Our X',amt:250},
+  {id:'tg',ico:'#34AADF',sym:'✈',title:'Join TG Channel',amt:200},
+  {id:'inv',ico:'#F4B400',sym:'👥',title:'Invite 5 Friends',amt:350},
 ];
-function buildTasks(){
-  const wrap = $('#taskList'); wrap.innerHTML='';
-  TASKS.forEach(t=>{
-    const done = state.doneTasks.includes(t.id);
-    const el = document.createElement('div'); el.className='card'; el.style.marginBottom='14px';
-    el.innerHTML = `<div class="task">
-        <div class="ico" style="background:${t.ico}">${t.sym}</div>
-        <div class="mid"><div class="ttl">${t.title}</div><div class="amt">🪙 ${t.amt}</div></div>
-        <button class="pill ${done?'done':''}" ${done?'disabled':''}>${done?'DONE':'CHECK'}</button>
-      </div>`;
+function buildTasks(){ const w=$('#taskList'); w.innerHTML='';
+  TASKS.forEach(t=>{ const done=state.doneTasks.includes(t.id);
+    const el=document.createElement('div'); el.className='card'; el.style.marginBottom='14px';
+    el.innerHTML=`<div class="task"><div class="ico" style="background:${t.ico}">${t.sym}</div>
+      <div class="mid"><div class="ttl">${t.title}</div><div class="amt">🪙 ${t.amt}</div></div>
+      <button class="pill ${done?'done':''}" ${done?'disabled':''}>${done?'DONE':'CHECK'}</button></div>`;
     el.querySelector('button').addEventListener('click', function(){
       if(state.doneTasks.includes(t.id)) return;
-      // prototype: trust-based check (real web build needs API/bot verification)
-      state.doneTasks.push(t.id); state.balance += t.amt;
-      this.textContent='DONE'; this.classList.add('done'); this.disabled=true;
-      render(); save(); toast(`+${t.amt} 적립!`);
-    });
-    wrap.appendChild(el);
-  });
+      state.doneTasks.push(t.id); state.balance+=t.amt;
+      this.textContent='DONE'; this.classList.add('done'); this.disabled=true; render(); save(); toast(`+${t.amt} 적립!`);
+    }); w.appendChild(el); });
 }
 
-/* ---------- invite ---------- */
-function copyCode(){
-  navigator.clipboard?.writeText(getId());
-  toast('코드 복사됨');
-}
-function shareInvite(){
-  const url = location.origin + location.pathname + '?ref=' + getId();
-  if(navigator.share){ navigator.share({title:'DUCKY', text:'같이 모으자!', url}); }
-  else { navigator.clipboard?.writeText(url); toast('초대링크 복사됨'); }
+/* INVITE */
+function copyCode(){ navigator.clipboard&&navigator.clipboard.writeText(getId()); toast('코드 복사됨'); }
+function shareInvite(){ const url=location.origin+location.pathname+'?ref='+getId();
+  if(navigator.share){ navigator.share({title:'DUCKY',text:'같이 모으자!',url}); }
+  else { navigator.clipboard&&navigator.clipboard.writeText(url); toast('초대링크 복사됨'); } }
+
+/* TABS */
+document.querySelectorAll('nav button').forEach(b=>{ b.addEventListener('click', ()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+  b.classList.add('on'); $('#'+b.dataset.tab).classList.add('active'); }); });
+
+/* TIMER (cosmetic) */
+let endAt=Number(localStorage.getItem('ducky_end')||0);
+if(!endAt||endAt<Date.now()){ endAt=Date.now()+17*60*1000; localStorage.setItem('ducky_end',endAt); }
+function tick(){ let ms=endAt-Date.now();
+  if(ms<=0){ endAt=Date.now()+17*60*1000; localStorage.setItem('ducky_end',endAt); ms=endAt-Date.now(); }
+  const s=Math.floor(ms/1000);
+  $('#timer').textContent='00:'+String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
+setInterval(tick,1000);
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) tick(); });
+
+/* TOAST */
+let toT; function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toT); toT=setTimeout(()=>t.classList.remove('show'),1600); }
+
+/* ============ PICKER ============ */
+function openPicker(){ $('#backdrop').classList.add('show'); $('#picker').classList.add('show'); }
+function closePicker(){ $('#backdrop').classList.remove('show'); $('#picker').classList.remove('show'); }
+
+/* ============ STAGE MAP ============ */
+const STAGES=12;
+function openToyPuzzle(){ closePicker(); openStageMap(); }
+function openStageMap(){ $('#stagemap').classList.add('show'); buildMap(); }
+function closeStageMap(){ $('#stagemap').classList.remove('show'); }
+function buildMap(){
+  const cleared=state.cleared||0, scroll=$('#mapScroll'), inner=$('#mapInner');
+  const w=scroll.clientWidth||360, GAP=120, TOP=90, BOT=110;
+  const H=TOP+BOT+(STAGES-1)*GAP; inner.style.height=H+'px';
+  const nodes=[];
+  for(let n=1;n<=STAGES;n++){ const y=H-BOT-(n-1)*GAP; const x=w*0.5+Math.sin(n*0.9)*w*0.24; nodes.push({n,x,y}); }
+  const pts=nodes.map(p=>`${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  let html=`<svg width="${w}" height="${H}" style="position:absolute;inset:0;pointer-events:none">
+    <polyline points="${pts}" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="10" stroke-linecap="round" stroke-dasharray="2 22"/></svg>`;
+  nodes.forEach(p=>{ let cls='node', star='';
+    if(p.n<=cleared){ cls+=' done'; star='<span class="star">⭐</span>'; }
+    else if(p.n===cleared+1){ cls+=' cur'; } else { cls+=' lock'; }
+    const tap=(p.n<=cleared+1)?`onclick="startStage(${p.n})"`:'';
+    html+=`<button class="${cls}" style="left:${p.x}px;top:${p.y}px" ${tap}>${star}${p.n}</button>`; });
+  inner.innerHTML=html; $('#mapPt').textContent=state.balance.toLocaleString();
+  const cur=nodes[Math.min(cleared,STAGES-1)];
+  requestAnimationFrame(()=>{ scroll.scrollTop=Math.max(0, cur.y-scroll.clientHeight*0.6); });
 }
 
-/* ---------- tabs ---------- */
-document.querySelectorAll('nav button').forEach(b=>{
-  b.addEventListener('click', ()=>{
-    document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));
-    document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
-    b.classList.add('on');
-    $('#'+b.dataset.tab).classList.add('active');
-  });
+/* ============ MATCH-3 (animated, persistent tiles) ============ */
+/* 카카오프렌즈 캐릭터는 저작권이 있어 직접 사용 불가 → 일반 이모지로 대체 */
+const M={ cols:8, rows:8, types:['🐤','🐱','🐻','🐰','🐸','🦊'], grid:[], busy:false, selEl:null,
+  movesLeft:20, target:'🐤', goal:12, collected:0, tiles:0, stage:1, cell:46, gap:4, pad:6 };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const ix=(r,c)=>r*M.cols+c;
+const rc=i=>[(i/M.cols|0), i%M.cols];
+const randType=()=>M.types[Math.random()*M.types.length|0];
+const typeAt=i=>M.grid[i]?M.grid[i].type:null;
+function xy(r,c){ return [M.pad+c*(M.cell+M.gap), M.pad+r*(M.cell+M.gap)]; }
+function place(t,r,c,scale){ scale=scale==null?1:scale; const a=xy(r,c); t.el.style.transform=`translate(${a[0]}px,${a[1]}px) scale(${scale})`; }
+function placeIdx(i,scale){ const t=M.grid[i]; if(!t)return; const p=rc(i); place(t,p[0],p[1],scale); }
+function makeTile(type){ const el=document.createElement('div'); el.className='tile'; el.textContent=type;
+  el.style.width=M.cell+'px'; el.style.height=M.cell+'px'; el.style.fontSize=(M.cell*0.6|0)+'px'; el.style.transition='none';
+  return {type, el}; }
+
+function startStage(n){
+  $('#stagemap').classList.remove('show'); $('#gresult').classList.remove('show'); $('#game').classList.add('show');
+  M.stage=n; M.busy=true; M.selEl=null; M.movesLeft=20; M.goal=8+n*2; M.collected=0; M.tiles=0; M.target=randType();
+  const board=$('#board'); const bw=board.clientWidth||360;
+  M.cell=Math.floor((bw-M.pad*2-M.gap*(M.cols-1))/M.cols);
+  board.innerHTML=''; M.grid=new Array(M.rows*M.cols).fill(null);
+  for(let r=0;r<M.rows;r++)for(let c=0;c<M.cols;c++){
+    let type; do{ type=randType(); }
+    while((c>=2 && typeAt(ix(r,c-1))===type && typeAt(ix(r,c-2))===type)
+       || (r>=2 && typeAt(ix(r-1,c))===type && typeAt(ix(r-2,c))===type));
+    const t=makeTile(type); M.grid[ix(r,c)]=t; board.appendChild(t.el); place(t,r,c);
+  }
+  if(!hasMove()) reshuffleTypes();
+  $('#gTarget').textContent=M.target; updateHud();
+  requestAnimationFrame(()=>{ M.grid.forEach(t=>{ if(t) t.el.style.transition=''; }); M.busy=false; });
+}
+function updateHud(){ $('#gCollected').textContent=M.collected; $('#gGoal').textContent=M.goal; $('#gMoves').textContent=M.movesLeft; }
+function adjacent(i,j){ const a=rc(i), b=rc(j); return Math.abs(a[0]-b[0])+Math.abs(a[1]-b[1])===1; }
+function swapGrid(i,j){ const t=M.grid[i]; M.grid[i]=M.grid[j]; M.grid[j]=t; }
+
+$('#board').addEventListener('pointerdown', e=>{
+  if(M.busy) return; const el=e.target.closest('.tile'); if(!el) return;
+  const i=M.grid.findIndex(t=>t&&t.el===el); if(i<0) return;
+  if(!M.selEl){ M.selEl=el; el.classList.add('sel'); return; }
+  if(M.selEl===el){ el.classList.remove('sel'); M.selEl=null; return; }
+  const j=M.grid.findIndex(t=>t&&t.el===M.selEl);
+  M.selEl.classList.remove('sel'); M.selEl=null;
+  if(j>=0 && adjacent(i,j)) trySwap(i,j); else { el.classList.add('sel'); M.selEl=el; }
 });
 
-/* ---------- countdown (cosmetic daily timer; resync on resume) ---------- */
-let endAt = Number(localStorage.getItem('ducky_end') || 0);
-if(!endAt || endAt < Date.now()){ endAt = Date.now() + 17*60*1000; localStorage.setItem('ducky_end', endAt); }
-function tick(){
-  let ms = endAt - Date.now();
-  if(ms <= 0){ endAt = Date.now() + 17*60*1000; localStorage.setItem('ducky_end', endAt); ms = endAt - Date.now(); }
-  const s = Math.floor(ms/1000);
-  $('#timer').textContent = '00:' + String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
+function findMatches(){ const m=new Set();
+  for(let r=0;r<M.rows;r++){ let run=1;
+    for(let c=1;c<M.cols;c++){ const cur=typeAt(ix(r,c)), pv=typeAt(ix(r,c-1));
+      if(cur!=null&&cur===pv) run++; else { if(run>=3) for(let k=0;k<run;k++) m.add(ix(r,c-1-k)); run=1; } }
+    if(run>=3) for(let k=0;k<run;k++) m.add(ix(r,M.cols-1-k)); }
+  for(let c=0;c<M.cols;c++){ let run=1;
+    for(let r=1;r<M.rows;r++){ const cur=typeAt(ix(r,c)), pv=typeAt(ix(r-1,c));
+      if(cur!=null&&cur===pv) run++; else { if(run>=3) for(let k=0;k<run;k++) m.add(ix(r-1-k,c)); run=1; } }
+    if(run>=3) for(let k=0;k<run;k++) m.add(ix(M.rows-1-k,c)); }
+  return m;
 }
-setInterval(tick, 1000);
-document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) tick(); }); // resync after background
 
-/* ---------- toast ---------- */
-let toT;
-function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toT); toT=setTimeout(()=>t.classList.remove('show'),1600); }
+async function trySwap(i,j){
+  M.busy=true;
+  swapGrid(i,j); placeIdx(i); placeIdx(j); await sleep(200);
+  if(findMatches().size===0){ swapGrid(i,j); placeIdx(i); placeIdx(j); await sleep(200); M.busy=false; return; }
+  M.movesLeft--; updateHud();
+  await resolve();
+  if(!hasMove()) reshuffleTypes();
+  M.busy=false; checkEnd();
+}
 
-/* ---------- daily button initial state ---------- */
+async function resolve(){
+  while(true){
+    const m=findMatches(); if(m.size===0) break;
+    m.forEach(i=>{ const t=M.grid[i]; if(!t)return; if(t.type===M.target) M.collected++; M.tiles++;
+      t.el.style.opacity='0'; placeIdx(i,0.2); }); updateHud();
+    await sleep(190);
+    m.forEach(i=>{ const t=M.grid[i]; if(t){ t.el.remove(); M.grid[i]=null; } });
+    await gravityAnim();
+  }
+}
+
+async function gravityAnim(){
+  const board=$('#board');
+  for(let c=0;c<M.cols;c++){
+    let write=M.rows-1;
+    for(let r=M.rows-1;r>=0;r--){ const i=ix(r,c), t=M.grid[i];
+      if(t){ if(write!==r){ M.grid[ix(write,c)]=t; M.grid[i]=null; } place(t,write,c); write--; } }
+    let above=-1;
+    for(let r=write;r>=0;r--){ const t=makeTile(randType()); M.grid[ix(r,c)]=t; board.appendChild(t.el);
+      place(t,above,c); above--; t.el.offsetHeight; t.el.style.transition=''; place(t,r,c); }
+  }
+  await sleep(230);
+}
+
+function hasMove(){
+  for(let i=0;i<M.rows*M.cols;i++){ const p=rc(i);
+    if(p[1]<M.cols-1){ swapGrid(i,i+1); const ok=findMatches().size>0; swapGrid(i,i+1); if(ok) return true; }
+    if(p[0]<M.rows-1){ swapGrid(i,i+M.cols); const ok=findMatches().size>0; swapGrid(i,i+M.cols); if(ok) return true; } }
+  return false;
+}
+function reshuffleTypes(){
+  const arr=M.grid.filter(Boolean); let tries=0;
+  do{ for(let i=arr.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; const t=arr[i].type; arr[i].type=arr[j].type; arr[j].type=t; } tries++; }
+  while((findMatches().size>0 || !hasMove()) && tries<40);
+  M.grid.forEach(t=>{ if(t) t.el.textContent=t.type; });
+}
+
+function checkEnd(){ if(M.collected>=M.goal) return endGame(true); if(M.movesLeft<=0) return endGame(false); }
+function endGame(win){
+  M.busy=true; let reward=0;
+  if(win){ reward=Math.max(25,Math.min(50, 25+(M.tiles/3|0)+M.movesLeft*2)); state.balance+=reward;
+    if(M.stage===(state.cleared||0)+1) state.cleared=M.stage; save(); render(); }
+  $('#grTitle').textContent=win?'🎉 STAGE CLEAR!':'아쉬워요!';
+  $('#grEarn').textContent=win?`+${reward} $Ducky point`:'다음 기회에 다시 도전!';
+  $('#gresult').classList.add('show');
+}
+function quitGame(){ $('#game').classList.remove('show'); $('#gresult').classList.remove('show'); openStageMap(); }
+
+/* init */
 if(state.claimedDaily){ const b=$('#dailyBtn'); b.textContent='CLAIMED'; b.classList.add('done'); b.disabled=true; }
-
 buildTasks(); render(); tick();
 </script>
 </body>
