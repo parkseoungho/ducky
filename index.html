@@ -188,6 +188,7 @@
     border-radius:12px; background:rgba(255,255,255,.55); cursor:pointer; user-select:none; touch-action:none;
     transition:transform .19s cubic-bezier(.34,1.15,.64,1), opacity .17s ease; will-change:transform;}
   .tile.sel{outline:3px solid var(--duck-deep); outline-offset:-3px; background:#fff; z-index:3;}
+  .tile.sp{background:#fff; box-shadow:0 0 0 3px var(--duck-deep) inset;}
   .fx{position:absolute; pointer-events:none; z-index:6;}
   .fx-ring{border:3px solid var(--c,#fff); border-radius:50%; animation:ring .46s ease-out forwards;}
   @keyframes ring{from{transform:translate(-50%,-50%) scale(.35); opacity:.85} to{transform:translate(-50%,-50%) scale(1.7); opacity:0}}
@@ -484,7 +485,7 @@ function buildMap(){
 
 /* ============ MATCH-3 (animated, persistent tiles) ============ */
 /* 카카오프렌즈 캐릭터는 저작권이 있어 직접 사용 불가 → 일반 이모지로 대체 */
-const M={ cols:8, rows:8, types:['🐤','🐱','🐻','🐰','🐸','🦊'], grid:[], busy:false, selEl:null,
+const M={ cols:8, rows:8, types:['🐤','🐱','🐻','🐰','🐸','🦊'], grid:[], busy:false, selEl:null, lastSwap:-1,
   movesLeft:20, target:'🐤', goal:12, collected:0, tiles:0, stage:1, cell:46, gap:4, pad:6 };
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const ix=(r,c)=>r*M.cols+c;
@@ -569,11 +570,85 @@ function findMatches(){ const m=new Set();
   return m;
 }
 
+/* ---- 아이템 시스템 ----
+   4개 매칭→로켓(줄 제거), L/T 매칭→폭탄(3x3), 5일자→색깔볼(타깃색 전체) */
+const SP_SYMBOL={rowClear:'↔️', colClear:'↕️', bomb:'💣', colorbomb:'🌈'};
+const colorOf=t=> (t&&t.special==='colorbomb')?'#fff':(TCOLOR[t?t.type:null]||'#fff');
+const matchesTarget=t=> !!(t && t.type===M.target);
+function setSpecial(t, shape, type){ t.special=shape; if(type!==undefined) t.type=type;
+  t.el.classList.add('sp'); t.el.textContent=SP_SYMBOL[shape]; }
+function findGroups(){
+  const N=M.rows*M.cols, inH=new Uint8Array(N), inV=new Uint8Array(N);
+  for(let r=0;r<M.rows;r++){ let run=1;
+    for(let c=1;c<=M.cols;c++){ const cur=c<M.cols?typeAt(ix(r,c)):null, pv=typeAt(ix(r,c-1));
+      if(c<M.cols&&cur!=null&&cur===pv) run++; else { if(run>=3) for(let k=0;k<run;k++) inH[ix(r,c-1-k)]=1; run=1; } } }
+  for(let c=0;c<M.cols;c++){ let run=1;
+    for(let r=1;r<=M.rows;r++){ const cur=r<M.rows?typeAt(ix(r,c)):null, pv=typeAt(ix(r-1,c));
+      if(r<M.rows&&cur!=null&&cur===pv) run++; else { if(run>=3) for(let k=0;k<run;k++) inV[ix(r-1-k,c)]=1; run=1; } } }
+  const seen=new Uint8Array(N), groups=[];
+  for(let i=0;i<N;i++){ if((inH[i]||inV[i])&&!seen[i]){
+    const type=typeAt(i), cells=[], stack=[i]; seen[i]=1;
+    let minR=99,maxR=-1,minC=99,maxC=-1,pivot=-1;
+    while(stack.length){ const cur=stack.pop(); cells.push(cur);
+      if(inH[cur]&&inV[cur]&&pivot<0) pivot=cur;
+      const p=rc(cur); if(p[0]<minR)minR=p[0]; if(p[0]>maxR)maxR=p[0]; if(p[1]<minC)minC=p[1]; if(p[1]>maxC)maxC=p[1];
+      const c0=p[1];
+      [[cur-1,c0>0],[cur+1,c0<M.cols-1],[cur-M.cols,true],[cur+M.cols,true]].forEach(nb=>{
+        const nn=nb[0]; if(nb[1]&&nn>=0&&nn<N&&!seen[nn]&&(inH[nn]||inV[nn])&&typeAt(nn)===type){ seen[nn]=1; stack.push(nn); } });
+    }
+    groups.push({cells,type,minR,maxR,minC,maxC,pivot});
+  } }
+  return groups;
+}
+function classify(g){
+  if(g.maxR>g.minR && g.maxC>g.minC) return 'bomb';        // 꺾임(L/T)
+  const s=g.cells.length;
+  if(s>=5) return 'colorbomb';                             // 5일자
+  if(s===4) return (g.maxR===g.minR)?'rowClear':'colClear';// 4개
+  return 'normal';
+}
+function spawnCell(g, shape){
+  if(shape==='bomb') return g.pivot>=0?g.pivot:g.cells[0];
+  if(M.lastSwap>=0 && g.cells.indexOf(M.lastSwap)>=0) return M.lastSwap; // 내가 움직인 칸에 생성
+  return g.cells[g.cells.length>>1];
+}
+function specialBlast(t, cell){
+  const p=rc(cell), r=p[0], c=p[1], out=[];
+  if(t.special==='rowClear'){ for(let cc=0;cc<M.cols;cc++) out.push(ix(r,cc)); }
+  else if(t.special==='colClear'){ for(let rr=0;rr<M.rows;rr++) out.push(ix(rr,c)); }
+  else if(t.special==='bomb'){ for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){ const rr=r+dr,cc=c+dc; if(rr>=0&&rr<M.rows&&cc>=0&&cc<M.cols) out.push(ix(rr,cc)); } }
+  else if(t.special==='colorbomb'){ for(let i=0;i<M.rows*M.cols;i++){ const g=M.grid[i]; if(g&&g.type===M.target) out.push(i); } }
+  return out;
+}
+function expandSpecials(clear, spawnCells){          // 연쇄 폭발
+  const q=[...clear];
+  while(q.length){ const cell=q.pop(); const t=M.grid[cell];
+    if(t&&t.special){ specialBlast(t,cell).forEach(bc=>{ if(!clear.has(bc)&&!spawnCells.has(bc)){ clear.add(bc); q.push(bc); } }); } }
+}
+async function applyClear(clear){
+  clear.forEach(i=>{ const t=M.grid[i]; if(!t)return; if(matchesTarget(t)) M.collected++; M.tiles++;
+    const p=rc(i),a=xy(p[0],p[1]); burst(a[0]+M.cell/2,a[1]+M.cell/2,colorOf(t)); t.el.style.opacity='0'; placeIdx(i,0.2); });
+  updateHud(); Sound.match(); await sleep(190);
+  clear.forEach(i=>{ const t=M.grid[i]; if(t){ t.el.remove(); M.grid[i]=null; } });
+}
+
 async function trySwap(i,j){
   M.busy=true;
+  const ti=M.grid[i], tj=M.grid[j];
+  if((ti&&ti.special==='colorbomb')||(tj&&tj.special==='colorbomb')){   // 색깔볼 스왑 → 상대 색 전체 제거
+    const cb=(ti&&ti.special==='colorbomb')?i:j, other=(cb===i)?j:i;
+    const tp=(M.grid[other]&&M.grid[other].type)||M.target;
+    M.movesLeft--; updateHud();
+    const clear=new Set();
+    for(let k=0;k<M.rows*M.cols;k++){ const g=M.grid[k]; if(g&&g.type===tp) clear.add(k); }
+    clear.add(cb); expandSpecials(clear, new Set());
+    await applyClear(clear); await gravityAnim();
+    await resolve(); if(!hasMove()) reshuffleTypes();
+    M.busy=false; checkEnd(); return;
+  }
   swapGrid(i,j); placeIdx(i); placeIdx(j); await sleep(200);
   if(findMatches().size===0){ swapGrid(i,j); placeIdx(i); placeIdx(j); await sleep(200); M.busy=false; return; }
-  M.movesLeft--; updateHud();
+  M.movesLeft--; updateHud(); M.lastSwap=j;
   await resolve();
   if(!hasMove()) reshuffleTypes();
   M.busy=false; checkEnd();
@@ -597,12 +672,16 @@ function burst(cx,cy,color){
 
 async function resolve(){
   while(true){
-    const m=findMatches(); if(m.size===0) break;
-    m.forEach(i=>{ const t=M.grid[i]; if(!t)return; if(t.type===M.target) M.collected++; M.tiles++;
-      const p=rc(i), a=xy(p[0],p[1]); burst(a[0]+M.cell/2, a[1]+M.cell/2, TCOLOR[t.type]||'#fff');
-      t.el.style.opacity='0'; placeIdx(i,0.2); }); updateHud(); Sound.match();
-    await sleep(190);
-    m.forEach(i=>{ const t=M.grid[i]; if(t){ t.el.remove(); M.grid[i]=null; } });
+    const groups=findGroups(); if(groups.length===0) break;
+    const clear=new Set(), spawns=[], spawnCells=new Set();
+    groups.forEach(g=>{ const shape=classify(g); let sp=-1;
+      if(shape!=='normal'){ sp=spawnCell(g,shape); spawns.push({cell:sp,shape,type:g.type}); spawnCells.add(sp); }
+      g.cells.forEach(ci=>{ if(ci!==sp) clear.add(ci); }); });
+    M.lastSwap=-1;
+    expandSpecials(clear, spawnCells);
+    await applyClear(clear);
+    spawns.forEach(s=>{ const t=M.grid[s.cell]; if(t){ t.el.classList.remove('sel');
+      setSpecial(t, s.shape, s.shape==='colorbomb'?null:s.type); } });
     await gravityAnim();
   }
 }
@@ -627,10 +706,10 @@ function hasMove(){
   return false;
 }
 function reshuffleTypes(){
-  const arr=M.grid.filter(Boolean); let tries=0;
+  const arr=M.grid.filter(t=>t&&!t.special); let tries=0;
   do{ for(let i=arr.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; const t=arr[i].type; arr[i].type=arr[j].type; arr[j].type=t; } tries++; }
   while((findMatches().size>0 || !hasMove()) && tries<40);
-  M.grid.forEach(t=>{ if(t) t.el.textContent=t.type; });
+  arr.forEach(t=>{ t.el.textContent=t.type; });
 }
 
 function checkEnd(){ if(M.collected>=M.goal) return endGame(true); if(M.movesLeft<=0) return endGame(false); }
