@@ -27,6 +27,9 @@
   header .menu{position:absolute; right:14px; top:calc(env(safe-area-inset-top) + 12px);
     width:30px; height:30px; border:2px solid var(--sky); border-radius:50%;
     color:var(--sky); display:grid; place-items:center; font-weight:800;}
+  header .snd{position:absolute; right:52px; top:calc(env(safe-area-inset-top) + 12px);
+    width:30px; height:30px; border:2px solid var(--sky); border-radius:50%; background:#fff;
+    color:var(--sky); display:grid; place-items:center; font-size:14px; cursor:pointer; padding:0;}
 
   main{flex:1 1 auto; position:relative; overflow:hidden;}
   .screen{position:absolute; inset:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
@@ -204,7 +207,8 @@
 <body>
 <div id="app">
   <header>
-    <div class="t">DUCKY</div><div class="s">미니 앱</div><div class="menu">···</div>
+    <div class="t">DUCKY</div><div class="s">미니 앱</div>
+    <button class="snd" id="sndBtn" onclick="Sound.toggle()">🔇</button><div class="menu">···</div>
   </header>
 
   <main>
@@ -339,6 +343,44 @@ const state = Object.assign({ balance:0, taps:0, claimedDaily:false, doneTasks:[
 function save(){ localStorage.setItem('ducky_state', JSON.stringify(state)); }
 const CAP=100;
 
+/* ============ SOUND (Web Audio 합성, 파일 불필요) ============ */
+const Sound = {
+  ctx:null, master:null, bgmGain:null, lp:null, on:false, playing:false, timer:null, step:0,
+  seq:[261.63,329.63,392.00,440.00,523.25,440.00,392.00,329.63],  // C메이저 펜타토닉 아르페지오
+  init(){ if(this.ctx) return;
+    const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    this.ctx=new AC();
+    this.master=this.ctx.createGain(); this.master.gain.value=0.5; this.master.connect(this.ctx.destination);
+    this.lp=this.ctx.createBiquadFilter(); this.lp.type='lowpass'; this.lp.frequency.value=1900;
+    this.bgmGain=this.ctx.createGain(); this.bgmGain.gain.value=0.55;
+    this.bgmGain.connect(this.lp); this.lp.connect(this.master);
+  },
+  resume(){ if(this.ctx && this.ctx.state==='suspended') this.ctx.resume(); },
+  _note(f,dur,type,g,dest){ if(!this.ctx) return; const t=this.ctx.currentTime;
+    const o=this.ctx.createOscillator(), ga=this.ctx.createGain();
+    o.type=type; o.frequency.value=f;
+    ga.gain.setValueAtTime(0.0001,t); ga.gain.linearRampToValueAtTime(g,t+0.03);
+    ga.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(ga); ga.connect(dest||this.master); o.start(t); o.stop(t+dur+0.05);
+  },
+  startBGM(){ if(this.playing||!this.ctx) return; this.playing=true; this.step=0;
+    this.timer=setInterval(()=>{
+      const f=this.seq[this.step%this.seq.length];
+      this._note(f,0.5,'sine',0.09,this.bgmGain);                      // 멜로디
+      if(this.step%8===0){ [130.81,196.00,329.63].forEach(pf=>this._note(pf,2.2,'triangle',0.045,this.bgmGain)); } // 패드
+      this.step++;
+    }, 320);
+  },
+  stopBGM(){ this.playing=false; clearInterval(this.timer); },
+  setOn(v){ this.on=v; localStorage.setItem('ducky_snd', v?'1':'0');
+    const b=document.querySelector('#sndBtn'); if(b) b.textContent=v?'🔊':'🔇';
+    if(v){ this.init(); this.resume(); this.startBGM(); } else { this.stopBGM(); } },
+  toggle(){ this.setOn(!this.on); },
+  tap(){ if(!this.on) return; this._note(720,0.09,'triangle',0.10); },
+  match(){ if(!this.on) return; this._note(880,0.09,'sine',0.11); setTimeout(()=>this._note(1320,0.08,'sine',0.09),55); },
+  win(){ if(!this.on) return; [523.25,659.25,784.00,1046.50].forEach((f,i)=>setTimeout(()=>this._note(f,0.2,'triangle',0.11),i*95)); },
+};
+
 function render(){
   $('#balance').textContent = state.balance.toLocaleString();
   $('#tapCount').textContent = state.taps;
@@ -352,7 +394,7 @@ function render(){
 /* TAP CORE */
 const duck=$('#duck'), wrap=$('#tapwrap');
 duck.addEventListener('pointerdown', e=>{
-  e.preventDefault(); if(state.taps>=CAP) return;
+  e.preventDefault(); if(state.taps>=CAP) return; Sound.tap();
   state.taps++; duck.classList.add('bounce'); setTimeout(()=>duck.classList.remove('bounce'),70);
   const r=wrap.getBoundingClientRect();
   const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left, y=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
@@ -558,7 +600,7 @@ async function resolve(){
     const m=findMatches(); if(m.size===0) break;
     m.forEach(i=>{ const t=M.grid[i]; if(!t)return; if(t.type===M.target) M.collected++; M.tiles++;
       const p=rc(i), a=xy(p[0],p[1]); burst(a[0]+M.cell/2, a[1]+M.cell/2, TCOLOR[t.type]||'#fff');
-      t.el.style.opacity='0'; placeIdx(i,0.2); }); updateHud();
+      t.el.style.opacity='0'; placeIdx(i,0.2); }); updateHud(); Sound.match();
     await sleep(190);
     m.forEach(i=>{ const t=M.grid[i]; if(t){ t.el.remove(); M.grid[i]=null; } });
     await gravityAnim();
@@ -593,7 +635,7 @@ function reshuffleTypes(){
 
 function checkEnd(){ if(M.collected>=M.goal) return endGame(true); if(M.movesLeft<=0) return endGame(false); }
 function endGame(win){
-  M.busy=true; let reward=0;
+  M.busy=true; let reward=0; if(win) Sound.win();
   if(win){ reward=Math.max(25,Math.min(50, 25+(M.tiles/3|0)+M.movesLeft*2)); state.balance+=reward;
     if(M.stage===(state.cleared||0)+1) state.cleared=M.stage; save(); render(); }
   $('#grTitle').textContent=win?'🎉 STAGE CLEAR!':'아쉬워요!';
@@ -605,6 +647,14 @@ function quitGame(){ $('#game').classList.remove('show'); $('#gresult').classLis
 /* init */
 if(state.claimedDaily){ const b=$('#dailyBtn'); b.textContent='CLAIMED'; b.classList.add('done'); b.disabled=true; }
 buildTasks(); render(); tick();
+
+/* sound: 저장된 설정 반영. 켜져있으면 브라우저 정책상 첫 터치 뒤 시작 */
+Sound.on = localStorage.getItem('ducky_snd')==='1';
+$('#sndBtn').textContent = Sound.on ? '🔊' : '🔇';
+if(Sound.on){
+  const kick=()=>{ Sound.init(); Sound.resume(); Sound.startBGM(); document.removeEventListener('pointerdown',kick); };
+  document.addEventListener('pointerdown', kick, {once:true});
+}
 </script>
 </body>
 </html>
